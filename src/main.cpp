@@ -1,7 +1,7 @@
-#include <iostream>
+#include "core/app.hpp"
 
 int main()
 {
-    std::cout << "HELLO!\n";
+    Exray::run();
     return 0;
 }

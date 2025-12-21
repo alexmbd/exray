@@ -12,8 +12,12 @@ project(
 )
 
 src = [
-  'src/main.cpp'
+  'src/main.cpp',
+  'src/core/app.cpp',
+  'src/core/canvas.cpp'
 ]
+
+inc = ['src']
 
 raylib_dep = subproject('raylib').get_variable('raylib_dep')
 
@@ -49,6 +53,7 @@ deps = declare_dependency(
 executable(
   'exray',
   src,
+  include_directories: inc,
   dependencies: deps,
   build_subdir: 'dist'
 )
