@@ -1,0 +1,12 @@
+BasedOnStyle: Microsoft
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: false
+AllowShortBlocksOnASingleLine: Always
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLoopsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: true
+BreakTemplateDeclarations: Yes
+FixNamespaceComments: false
+ColumnLimit: 140
