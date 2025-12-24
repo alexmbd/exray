@@ -10,9 +10,20 @@ Canvas::Canvas(int32_t width, int32_t height) : m_width(width), m_height(height)
     m_tvgCanvas->target((uint32_t *)m_image.data, width, width, height, tvg::ColorSpace::ARGB8888);
 }
 
-void Canvas::draw()
+Canvas::~Canvas()
 {
-    for (const auto &shape : m_shapes) { m_tvgCanvas->push(shape.tvgShape); }
+    UnloadTexture(m_texture);
+    delete m_tvgCanvas;
+}
+
+void Canvas::draw(const Camera &camera)
+{
+    for (const Shape &shape : m_shapes)
+    {
+        shape.tvgShape->translate(camera.target.x, camera.target.y);
+        shape.tvgShape->scale(camera.zoom);
+        m_tvgCanvas->push(shape.tvgShape);
+    }
     m_tvgCanvas->draw();
     m_tvgCanvas->sync();
 
@@ -44,7 +55,22 @@ void Canvas::draw()
     UpdateTexture(m_texture, rgba.data());
 }
 
-void Canvas::addShape(const Shape &shape) { m_shapes.push_back(shape); }
+uint32_t Canvas::createShape()
+{
+    m_currentID++;
+    m_shapes.emplace_back(Shape{tvg::Shape::gen(), m_currentID});
+    return m_currentID;
+}
+
+Shape *Canvas::shape(uint32_t id)
+{
+    for (std::size_t i = 0; i < m_shapes.size(); i++)
+    {
+        Shape *shape = &m_shapes[i];
+        if (shape->id == id) { return shape; }
+    }
+    return nullptr;
+}
 
 const Texture2D &Canvas::texture() const { return m_texture; }
 }

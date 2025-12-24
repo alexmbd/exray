@@ -1,11 +1,11 @@
 #pragma once
 
+#include "canvas.hpp"
+
 #include <memory>
 
 namespace Exray
 {
-class Canvas;
-
 struct Window
 {
     int32_t width;
@@ -24,6 +24,8 @@ class Application
 
   private:
     std::unique_ptr<Canvas> m_canvas;
+    Camera m_camera;
+    bool m_needToRedraw = false;
 };
 
 void run();

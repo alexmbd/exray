@@ -3,7 +3,7 @@ project(
   'cpp',
   meson_version: '>=1.10.0',
   default_options: [
-    'cpp_std=c++20',
+    'cpp_std=c++23',
     'buildtype=release'
   ],
   subproject_dir: 'external',
@@ -36,6 +36,7 @@ openmp_dep = dependency('openmp', language: 'cpp')
 sys_deps = []
 cpp = meson.get_compiler('cpp')
 if host_machine.system() == 'windows'
+  add_project_link_arguments('-lstdc++exp', language: 'cpp') # For MinGW
   sys_deps += [
     cpp.find_library('opengl32'),
     cpp.find_library('gdi32'),
