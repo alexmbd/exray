@@ -8,10 +8,11 @@ Application::Application(const Window &window)
 {
     tvg::Initializer::init();
 
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(window.frameRate);
     InitWindow(window.width, window.height, "Exray");
 
-    m_canvas = std::make_unique<Canvas>(window.width, window.height);
+    m_canvas = std::make_unique<Canvas>(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()));
     m_camera = Camera{Vector2{0.0f, 0.0f}, 1.0f};
 
     // TEMP

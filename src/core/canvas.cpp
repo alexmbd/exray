@@ -4,10 +4,10 @@ namespace Exray
 {
 Canvas::Canvas(int32_t width, int32_t height) : m_width(width), m_height(height)
 {
-    m_image     = GenImageColor(width, height, BLANK);
+    m_image     = GenImageColor(m_width, m_height, BLANK);
     m_texture   = LoadTextureFromImage(m_image);
     m_tvgCanvas = tvg::SwCanvas::gen();
-    m_tvgCanvas->target((uint32_t *)m_image.data, width, width, height, tvg::ColorSpace::ARGB8888);
+    m_tvgCanvas->target((uint32_t *)m_image.data, m_width, m_width, m_height, tvg::ColorSpace::ARGB8888);
 }
 
 Canvas::~Canvas()
