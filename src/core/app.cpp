@@ -75,8 +75,14 @@ void Application::update()
             m_state = State::DrawRect;
             SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
         }
+
+        if (IsKeyReleased(KEY_FOUR))
+        {
+            m_state = State::DrawEllipse;
+            SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
+        }
     }
-    else if (m_state == State::DrawRect)
+    else
     {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
@@ -90,12 +96,20 @@ void Application::update()
                 shape->tvgShape->strokeFill(0, 0, 0, 255);
                 shape->tvgShape->strokeWidth(1.0f);
             }
-            Vector2 pos  = {std::min(m_tempStartPos.x, worldMousePos.x), std::min(m_tempStartPos.y, worldMousePos.y)};
+            Vector2 pos  = Vector2Min(worldMousePos, m_tempStartPos);
             Vector2 size = Vector2Subtract(worldMousePos, m_tempStartPos);
 
             Shape *shape = m_canvas->shape(m_tempId);
             shape->tvgShape->reset();
-            shape->tvgShape->appendRect(pos.x, pos.y, std::abs(size.x), std::abs(size.y));
+
+            if (m_state == State::DrawRect) { shape->tvgShape->appendRect(pos.x, pos.y, std::abs(size.x), std::abs(size.y)); }
+            else if (m_state == State::DrawEllipse)
+            {
+                Vector2 radius = Vector2Scale(size, 0.5f);
+                float cx       = pos.x + std::abs(radius.x);
+                float cy       = pos.y + std::abs(radius.y);
+                shape->tvgShape->appendCircle(cx, cy, std::abs(radius.x), std::abs(radius.y));
+            }
             m_needToRedraw = true;
         }
 
