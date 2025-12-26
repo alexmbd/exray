@@ -25,14 +25,13 @@ class Canvas
     Canvas(int32_t width, int32_t height);
     ~Canvas();
 
-    void draw(const Camera &camera);
+    void update(const Camera &camera);
+    void draw();
 
     // Returns the id of the created Shape
     uint32_t createShape();
     // Returns a non-owning pointer or a nullptr if Shape.id is not in the Canvas
     Shape *shape(uint32_t id);
-
-    const Texture2D &texture() const;
 
   private:
     tvg::SwCanvas *m_tvgCanvas;
@@ -40,8 +39,6 @@ class Canvas
 
     uint32_t m_currentID = 0;
 
-    int32_t m_width      = 0;
-    int32_t m_height     = 0;
     Image m_image        = {0};
     Texture2D m_texture  = {0};
 };

@@ -2,6 +2,8 @@
 
 #include "raymath.h"
 
+#include <format>
+
 namespace Exray
 {
 Application::Application(const Window &window)
@@ -16,23 +18,20 @@ Application::Application(const Window &window)
     m_camera = Camera{Vector2{0.0f, 0.0f}, 1.0f};
 
     // TEMP
-    uint32_t id1 = m_canvas->createShape();
-    Shape *shape = m_canvas->shape(id1);
-    shape->tvgShape->moveTo(0, 0);
-    shape->tvgShape->lineTo(100, 100);
-    shape->tvgShape->lineTo(0, 100);
-    shape->tvgShape->lineTo(100, 0);
-    shape->tvgShape->fill(255, 0, 0, 255);
+    for (int i = 0; i < 500; i++)
+    {
+        uint32_t id1  = m_canvas->createShape();
+        Shape *shape1 = m_canvas->shape(id1);
+        int value     = GetRandomValue(0, 1000);
+        int value2    = GetRandomValue(0, 1000);
+        shape1->tvgShape->moveTo(value, value2);
+        shape1->tvgShape->lineTo(100 + value, 100 + value2);
+        shape1->tvgShape->lineTo(0 + value, 100 + value2);
+        shape1->tvgShape->lineTo(100 + value, 0 + value2);
+        shape1->tvgShape->fill(255, value, value2, 255);
+    }
 
-    uint32_t id2  = m_canvas->createShape();
-    Shape *shape2 = m_canvas->shape(id2);
-    shape2->tvgShape->moveTo(200, 200);
-    shape2->tvgShape->lineTo(300, 300);
-    shape2->tvgShape->lineTo(200, 300);
-    shape2->tvgShape->lineTo(300, 200);
-    shape2->tvgShape->fill(0, 255, 0, 255);
-
-    m_canvas->draw(m_camera);
+    m_canvas->update(m_camera);
 }
 
 Application::~Application()
@@ -43,6 +42,7 @@ Application::~Application()
 
 void Application::update()
 {
+    SetWindowTitle(std::format("Exray - {} fps", GetFPS()).data());
     if (float wheel = GetMouseWheelMove(); wheel != 0.0f)
     {
         Vector2 mousePos  = GetMousePosition();
@@ -64,7 +64,7 @@ void Application::update()
 
     if (m_needToRedraw)
     {
-        m_canvas->draw(m_camera);
+        m_canvas->update(m_camera);
         m_needToRedraw = false;
     }
 }
@@ -73,7 +73,7 @@ void Application::draw()
 {
     BeginDrawing();
     ClearBackground(WHITE);
-    DrawTexture(m_canvas->texture(), 0, 0, WHITE);
+    m_canvas->draw();
     EndDrawing();
 }
 
