@@ -16,6 +16,12 @@ struct Window
 class Application
 {
   public:
+    enum class State
+    {
+        Select,
+        DrawRect,
+    };
+
     Application(const Window &window);
     ~Application();
 
@@ -25,7 +31,12 @@ class Application
   private:
     std::unique_ptr<Canvas> m_canvas;
     Camera m_camera;
-    bool m_needToRedraw = false;
+
+    uint32_t m_tempId      = 0;
+    Vector2 m_tempStartPos = {0};
+
+    State m_state          = State::Select;
+    bool m_needToRedraw    = false;
 };
 
 void run();
