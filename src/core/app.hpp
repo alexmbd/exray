@@ -38,6 +38,9 @@ class Application
 
     State m_state          = State::Select;
     bool m_needToRedraw    = false;
+
+    void selectState();
+    void drawState();
 };
 
 void run();
