@@ -20,7 +20,9 @@ class Application
     {
         Select,
         DrawRect,
-        DrawEllipse
+        DrawDiamond,
+        DrawEllipse,
+        DrawLine
     };
 
     Application(const Window &window);

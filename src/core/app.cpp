@@ -78,9 +78,21 @@ void Application::selectState()
         SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
     }
 
+    if (IsKeyReleased(KEY_THREE))
+    {
+        m_state = State::DrawDiamond;
+        SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
+    }
+
     if (IsKeyReleased(KEY_FOUR))
     {
         m_state = State::DrawEllipse;
+        SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
+    }
+
+    if (IsKeyReleased(KEY_SIX))
+    {
+        m_state = State::DrawLine;
         SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
     }
 }
@@ -106,12 +118,24 @@ void Application::drawState()
         shape->tvgShape->reset();
 
         if (m_state == State::DrawRect) { shape->tvgShape->appendRect(pos.x, pos.y, std::abs(size.x), std::abs(size.y)); }
+        else if (m_state == State::DrawDiamond)
+        {
+            Vector2 radius       = Vector2Scale(size, 0.5f);
+            Vector2 topCenter    = {pos.x + std::abs(radius.x), pos.y};
+            Vector2 bottomCenter = {pos.x + std::abs(radius.x), pos.y + std::abs(size.y)};
+            Vector2 leftCenter   = {pos.x, pos.y + std::abs(radius.y)};
+            Vector2 rightCenter  = {pos.x + std::abs(size.x), pos.y + std::abs(radius.y)};
+            shape->tvgShape->moveTo(topCenter.x, topCenter.y);
+            shape->tvgShape->lineTo(rightCenter.x, rightCenter.y);
+            shape->tvgShape->lineTo(bottomCenter.x, bottomCenter.y);
+            shape->tvgShape->lineTo(leftCenter.x, leftCenter.y);
+            shape->tvgShape->close();
+        }
         else if (m_state == State::DrawEllipse)
         {
             Vector2 radius = Vector2Scale(size, 0.5f);
-            float cx       = pos.x + std::abs(radius.x);
-            float cy       = pos.y + std::abs(radius.y);
-            shape->tvgShape->appendCircle(cx, cy, std::abs(radius.x), std::abs(radius.y));
+            Vector2 center = {pos.x + std::abs(radius.x), pos.y + std::abs(radius.y)};
+            shape->tvgShape->appendCircle(center.x, center.y, std::abs(radius.x), std::abs(radius.y));
         }
         m_needToRedraw = true;
     }
