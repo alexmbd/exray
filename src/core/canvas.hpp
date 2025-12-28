@@ -33,6 +33,10 @@ class Canvas
     // Returns a non-owning pointer or a nullptr if Shape.id is not in the Canvas
     Shape *shape(uint32_t id);
 
+    void addRect(uint32_t id, const Vector2 &pos, const Vector2 &size);
+    void addDiamond(uint32_t id, const Vector2 &pos, const Vector2 &size);
+    void addEllipse(uint32_t id, const Vector2 &pos, const Vector2 &size);
+
   private:
     tvg::SwCanvas *m_tvgCanvas;
     std::vector<Shape> m_shapes;

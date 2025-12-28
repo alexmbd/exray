@@ -99,45 +99,79 @@ void Application::selectState()
 
 void Application::drawState()
 {
-    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    if (m_state == State::DrawLine)
     {
         Vector2 mousePos      = GetMousePosition();
         Vector2 worldMousePos = {(mousePos.x - m_camera.target.x) / m_camera.zoom, (mousePos.y - m_camera.target.y) / m_camera.zoom};
-        if (m_tempId == 0)
+
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
         {
-            m_tempId       = m_canvas->createShape();
-            m_tempStartPos = Vector2{worldMousePos.x, worldMousePos.y};
-            Shape *shape   = m_canvas->shape(m_tempId);
-            shape->tvgShape->strokeFill(0, 0, 0, 255);
-            shape->tvgShape->strokeWidth(1.0f);
+            if (m_tempId == 0)
+            {
+                m_tempId     = m_canvas->createShape();
+                Shape *shape = m_canvas->shape(m_tempId);
+                shape->tvgShape->strokeFill(0, 0, 0, 255);
+                shape->tvgShape->strokeWidth(2.0f);
+            }
+            m_tempPoints.emplace_back(worldMousePos);
         }
-        Vector2 pos  = Vector2Min(worldMousePos, m_tempStartPos);
-        Vector2 size = Vector2Subtract(worldMousePos, m_tempStartPos);
 
         Shape *shape = m_canvas->shape(m_tempId);
-        shape->tvgShape->reset();
+        if (shape)
+        {
+            shape->tvgShape->reset();
+            for (std::size_t i = 0; i < m_tempPoints.size(); i++)
+            {
+                const Vector2 &pos = m_tempPoints[i];
+                if (i == 0) { shape->tvgShape->moveTo(pos.x, pos.y); }
+                else
+                {
+                    shape->tvgShape->lineTo(pos.x, pos.y);
+                }
+            }
+            shape->tvgShape->lineTo(worldMousePos.x, worldMousePos.y);
+            Vector2 diff = Vector2Subtract(m_tempPoints[0], worldMousePos);
+            if ((m_tempPoints.size() >= 3) && (std::abs(diff.x) < 4.0f) && (std::abs(diff.y) < 4.0f))
+            {
+                shape->tvgShape->reset();
+                for (std::size_t i = 0; i < m_tempPoints.size(); i++)
+                {
+                    const Vector2 &pos = m_tempPoints[i];
+                    if (i == 0) { shape->tvgShape->moveTo(pos.x, pos.y); }
+                    else
+                    {
+                        shape->tvgShape->lineTo(pos.x, pos.y);
+                    }
+                }
+                shape->tvgShape->close();
+                m_tempLineDone = true;
+            }
+            m_needToRedraw = true;
+        }
+    }
+    else
+    {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
+            Vector2 mousePos      = GetMousePosition();
+            Vector2 worldMousePos = {(mousePos.x - m_camera.target.x) / m_camera.zoom, (mousePos.y - m_camera.target.y) / m_camera.zoom};
+            if (m_tempId == 0)
+            {
+                m_tempId       = m_canvas->createShape();
+                m_tempStartPos = Vector2{worldMousePos.x, worldMousePos.y};
+                Shape *shape   = m_canvas->shape(m_tempId);
+                shape->tvgShape->strokeFill(0, 0, 0, 255);
+                shape->tvgShape->strokeWidth(2.0f);
+            }
+            Vector2 pos  = Vector2Min(worldMousePos, m_tempStartPos);
+            Vector2 size = Vector2Subtract(worldMousePos, m_tempStartPos);
+            size         = Vector2{std::abs(size.x), std::abs(size.y)};
 
-        if (m_state == State::DrawRect) { shape->tvgShape->appendRect(pos.x, pos.y, std::abs(size.x), std::abs(size.y)); }
-        else if (m_state == State::DrawDiamond)
-        {
-            Vector2 radius       = Vector2Scale(size, 0.5f);
-            Vector2 topCenter    = {pos.x + std::abs(radius.x), pos.y};
-            Vector2 bottomCenter = {pos.x + std::abs(radius.x), pos.y + std::abs(size.y)};
-            Vector2 leftCenter   = {pos.x, pos.y + std::abs(radius.y)};
-            Vector2 rightCenter  = {pos.x + std::abs(size.x), pos.y + std::abs(radius.y)};
-            shape->tvgShape->moveTo(topCenter.x, topCenter.y);
-            shape->tvgShape->lineTo(rightCenter.x, rightCenter.y);
-            shape->tvgShape->lineTo(bottomCenter.x, bottomCenter.y);
-            shape->tvgShape->lineTo(leftCenter.x, leftCenter.y);
-            shape->tvgShape->close();
+            if (m_state == State::DrawRect) { m_canvas->addRect(m_tempId, pos, size); }
+            else if (m_state == State::DrawDiamond) { m_canvas->addDiamond(m_tempId, pos, size); }
+            else if (m_state == State::DrawEllipse) { m_canvas->addEllipse(m_tempId, pos, size); }
+            m_needToRedraw = true;
         }
-        else if (m_state == State::DrawEllipse)
-        {
-            Vector2 radius = Vector2Scale(size, 0.5f);
-            Vector2 center = {pos.x + std::abs(radius.x), pos.y + std::abs(radius.y)};
-            shape->tvgShape->appendCircle(center.x, center.y, std::abs(radius.x), std::abs(radius.y));
-        }
-        m_needToRedraw = true;
     }
 
     if (m_needToRedraw)
@@ -146,8 +180,11 @@ void Application::drawState()
         m_needToRedraw = false;
     }
 
-    if ((IsKeyReleased(KEY_ONE)) || (IsKeyReleased(KEY_ESCAPE)) || (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)))
+    if (IsKeyReleased(KEY_ONE) || IsKeyReleased(KEY_ESCAPE) || (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && (m_state != State::DrawLine)) ||
+        m_tempLineDone)
     {
+        m_tempPoints.clear();
+        m_tempLineDone = false;
         m_tempId       = 0;
         m_tempStartPos = {0};
         m_canvas->update(m_camera);

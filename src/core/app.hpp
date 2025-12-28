@@ -35,6 +35,8 @@ class Application
     std::unique_ptr<Canvas> m_canvas;
     Camera m_camera;
 
+    std::vector<Vector2> m_tempPoints;
+    bool m_tempLineDone    = false;
     uint32_t m_tempId      = 0;
     Vector2 m_tempStartPos = {0};
 
