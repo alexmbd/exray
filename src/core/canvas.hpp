@@ -36,14 +36,19 @@ class Canvas
     void addRect(uint32_t id, const Vector2 &pos, const Vector2 &size);
     void addDiamond(uint32_t id, const Vector2 &pos, const Vector2 &size);
     void addEllipse(uint32_t id, const Vector2 &pos, const Vector2 &size);
+    void addLine(uint32_t id, const Vector2 &posA, const Vector2 &posB);
+    // Returns true if the lines create a closed shape (points[0] == pos approximately) and false otherwise
+    bool addLines(uint32_t id, const Vector2 &pos, const std::vector<Vector2> &points);
 
   private:
     tvg::SwCanvas *m_tvgCanvas;
     std::vector<Shape> m_shapes;
 
-    uint32_t m_currentID = 0;
+    uint32_t m_currentID  = 0;
 
-    Image m_image        = {0};
-    Texture2D m_texture  = {0};
+    float m_lineThreshold = 2.0f;
+
+    Image m_image         = {0};
+    Texture2D m_texture   = {0};
 };
 }

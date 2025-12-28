@@ -104,49 +104,36 @@ void Application::drawState()
         Vector2 mousePos      = GetMousePosition();
         Vector2 worldMousePos = {(mousePos.x - m_camera.target.x) / m_camera.zoom, (mousePos.y - m_camera.target.y) / m_camera.zoom};
 
-        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && (m_drawAttr.id == 0))
         {
-            if (m_tempId == 0)
-            {
-                m_tempId     = m_canvas->createShape();
-                Shape *shape = m_canvas->shape(m_tempId);
-                shape->tvgShape->strokeFill(0, 0, 0, 255);
-                shape->tvgShape->strokeWidth(2.0f);
-            }
-            m_tempPoints.emplace_back(worldMousePos);
+            m_drawAttr.id = m_canvas->createShape();
+            m_drawAttr.points.emplace_back(worldMousePos);
+            m_drawAttr.isDragging = true;
+            Shape *shape          = m_canvas->shape(m_drawAttr.id);
+            shape->tvgShape->strokeFill(0, 0, 0, 255);
+            shape->tvgShape->strokeWidth(2.0f);
         }
 
-        Shape *shape = m_canvas->shape(m_tempId);
-        if (shape)
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
         {
-            shape->tvgShape->reset();
-            for (std::size_t i = 0; i < m_tempPoints.size(); i++)
+            if ((m_drawAttr.points.size() != 1) || !m_drawAttr.isDragging) { m_drawAttr.points.emplace_back(worldMousePos); }
+            else
             {
-                const Vector2 &pos = m_tempPoints[i];
-                if (i == 0) { shape->tvgShape->moveTo(pos.x, pos.y); }
+                float distance = Vector2Distance(worldMousePos, m_drawAttr.points[0]);
+                if (distance < m_drawAttr.distanceThreshold) { m_drawAttr.isDragging = false; }
                 else
                 {
-                    shape->tvgShape->lineTo(pos.x, pos.y);
+                    m_canvas->addLine(m_drawAttr.id, m_drawAttr.points[0], worldMousePos);
+                    m_drawAttr.lineDone = true;
+                    m_needToRedraw      = true;
                 }
             }
-            shape->tvgShape->lineTo(worldMousePos.x, worldMousePos.y);
-            Vector2 diff = Vector2Subtract(m_tempPoints[0], worldMousePos);
-            if ((m_tempPoints.size() >= 3) && (std::abs(diff.x) < 4.0f) && (std::abs(diff.y) < 4.0f))
-            {
-                shape->tvgShape->reset();
-                for (std::size_t i = 0; i < m_tempPoints.size(); i++)
-                {
-                    const Vector2 &pos = m_tempPoints[i];
-                    if (i == 0) { shape->tvgShape->moveTo(pos.x, pos.y); }
-                    else
-                    {
-                        shape->tvgShape->lineTo(pos.x, pos.y);
-                    }
-                }
-                shape->tvgShape->close();
-                m_tempLineDone = true;
-            }
-            m_needToRedraw = true;
+        }
+
+        if ((m_drawAttr.id != 0) && (!m_drawAttr.lineDone))
+        {
+            m_drawAttr.lineDone = m_canvas->addLines(m_drawAttr.id, worldMousePos, m_drawAttr.points);
+            m_needToRedraw      = true;
         }
     }
     else
@@ -155,21 +142,21 @@ void Application::drawState()
         {
             Vector2 mousePos      = GetMousePosition();
             Vector2 worldMousePos = {(mousePos.x - m_camera.target.x) / m_camera.zoom, (mousePos.y - m_camera.target.y) / m_camera.zoom};
-            if (m_tempId == 0)
+            if (m_drawAttr.id == 0)
             {
-                m_tempId       = m_canvas->createShape();
-                m_tempStartPos = Vector2{worldMousePos.x, worldMousePos.y};
-                Shape *shape   = m_canvas->shape(m_tempId);
+                m_drawAttr.id = m_canvas->createShape();
+                m_drawAttr.points.emplace_back(worldMousePos);
+                Shape *shape = m_canvas->shape(m_drawAttr.id);
                 shape->tvgShape->strokeFill(0, 0, 0, 255);
                 shape->tvgShape->strokeWidth(2.0f);
             }
-            Vector2 pos  = Vector2Min(worldMousePos, m_tempStartPos);
-            Vector2 size = Vector2Subtract(worldMousePos, m_tempStartPos);
+            Vector2 pos  = Vector2Min(worldMousePos, m_drawAttr.points[0]);
+            Vector2 size = Vector2Subtract(worldMousePos, m_drawAttr.points[0]);
             size         = Vector2{std::abs(size.x), std::abs(size.y)};
 
-            if (m_state == State::DrawRect) { m_canvas->addRect(m_tempId, pos, size); }
-            else if (m_state == State::DrawDiamond) { m_canvas->addDiamond(m_tempId, pos, size); }
-            else if (m_state == State::DrawEllipse) { m_canvas->addEllipse(m_tempId, pos, size); }
+            if (m_state == State::DrawRect) { m_canvas->addRect(m_drawAttr.id, pos, size); }
+            else if (m_state == State::DrawDiamond) { m_canvas->addDiamond(m_drawAttr.id, pos, size); }
+            else if (m_state == State::DrawEllipse) { m_canvas->addEllipse(m_drawAttr.id, pos, size); }
             m_needToRedraw = true;
         }
     }
@@ -181,12 +168,9 @@ void Application::drawState()
     }
 
     if (IsKeyReleased(KEY_ONE) || IsKeyReleased(KEY_ESCAPE) || (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && (m_state != State::DrawLine)) ||
-        m_tempLineDone)
+        m_drawAttr.lineDone)
     {
-        m_tempPoints.clear();
-        m_tempLineDone = false;
-        m_tempId       = 0;
-        m_tempStartPos = {0};
+        m_drawAttr.reset();
         m_canvas->update(m_camera);
         m_needToRedraw = false;
         m_state        = State::Select;

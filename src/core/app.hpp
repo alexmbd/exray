@@ -32,16 +32,30 @@ class Application
     void draw();
 
   private:
+    struct DrawAttributes
+    {
+        std::vector<Vector2> points;
+        bool lineDone           = false;
+        bool isDragging         = false;
+        uint32_t id             = 0;
+        float distanceThreshold = 8.0f;
+
+        inline void reset()
+        {
+            points.clear();
+            lineDone   = false;
+            isDragging = false;
+            id         = 0;
+        }
+    };
+
     std::unique_ptr<Canvas> m_canvas;
     Camera m_camera;
 
-    std::vector<Vector2> m_tempPoints;
-    bool m_tempLineDone    = false;
-    uint32_t m_tempId      = 0;
-    Vector2 m_tempStartPos = {0};
+    DrawAttributes m_drawAttr;
 
-    State m_state          = State::Select;
-    bool m_needToRedraw    = false;
+    State m_state       = State::Select;
+    bool m_needToRedraw = false;
 
     void selectState();
     void drawState();

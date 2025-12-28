@@ -89,4 +89,32 @@ void Canvas::addEllipse(uint32_t id, const Vector2 &pos, const Vector2 &size)
     Vector2 center = {pos.x + radius.x, pos.y + radius.y};
     s->tvgShape->appendCircle(center.x, center.y, radius.x, radius.y);
 }
+
+void Canvas::addLine(uint32_t id, const Vector2 &posA, const Vector2 &posB)
+{
+    Shape *s = shape(id);
+    s->tvgShape->reset();
+    s->tvgShape->lineTo(posA.x, posA.y);
+    s->tvgShape->lineTo(posB.x, posB.y);
+}
+
+bool Canvas::addLines(uint32_t id, const Vector2 &pos, const std::vector<Vector2> &points)
+{
+    Shape *s = shape(id);
+    s->tvgShape->reset();
+
+    for (const Vector2 &point : points) { s->tvgShape->lineTo(point.x, point.y); }
+
+    Vector2 diff = Vector2Subtract(points[0], pos);
+    if ((points.size() >= 3) && (std::abs(diff.x) < m_lineThreshold) && (std::abs(diff.y) < m_lineThreshold))
+    {
+        s->tvgShape->close();
+        return true;
+    }
+    else
+    {
+        s->tvgShape->lineTo(pos.x, pos.y);
+        return false;
+    }
+}
 }
