@@ -63,7 +63,16 @@ void Canvas::addRect(uint32_t id, const Vector2 &pos, const Vector2 &size)
 {
     Shape *s = shape(id);
     s->tvgShape->reset();
-    s->tvgShape->appendRect(pos.x, pos.y, size.x, size.y);
+    Vector2 topRight    = {pos.x + size.x, pos.y};
+    Vector2 bottomRight = Vector2Add(pos, size);
+    // The y value of bottomLeft has a (+ 0.025f) term as a workaround
+    // to prevent false detecting the inside of the rect when it's not filled
+    Vector2 bottomLeft = {pos.x, pos.y + size.y + 0.025f};
+    s->tvgShape->moveTo(pos.x, pos.y);
+    s->tvgShape->lineTo(topRight.x, topRight.y);
+    s->tvgShape->lineTo(bottomRight.x, bottomRight.y);
+    s->tvgShape->lineTo(bottomLeft.x, bottomLeft.y);
+    s->tvgShape->close();
 }
 
 void Canvas::addDiamond(uint32_t id, const Vector2 &pos, const Vector2 &size)
