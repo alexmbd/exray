@@ -27,10 +27,11 @@ Canvas::~Canvas()
 
 void Canvas::update(const Camera &camera)
 {
-    for (const Shape &shape : m_shapes)
+    for (Shape &shape : m_shapes)
     {
         shape.tvgShape->translate(camera.target.x, camera.target.y);
         shape.tvgShape->scale(camera.zoom);
+        shape.tvgShape->bounds(&shape.bounds.x, &shape.bounds.y, &shape.bounds.width, &shape.bounds.height);
         m_tvgCanvas->push(shape.tvgShape);
     }
     m_tvgCanvas->draw();
@@ -44,7 +45,7 @@ void Canvas::draw() { DrawTexture(m_texture, 0, 0, WHITE); }
 uint32_t Canvas::createShape()
 {
     m_currentID++;
-    m_shapes.emplace_back(Shape{tvg::Shape::gen(), m_currentID});
+    m_shapes.emplace_back(Shape{tvg::Shape::gen(), m_currentID, Rectangle{0.0f, 0.0f, 0.0f, 0.0f}});
     return m_currentID;
 }
 
@@ -116,5 +117,16 @@ bool Canvas::addLines(uint32_t id, const Vector2 &pos, const std::vector<Vector2
         s->tvgShape->lineTo(pos.x, pos.y);
         return false;
     }
+}
+
+uint32_t Canvas::shapeHasPoint(const Vector2 &pos)
+{
+    // The first item of the vector is always the background rect
+    for (std::size_t i = m_shapes.size() - 1; i > 0; i--)
+    {
+        const Shape &s = m_shapes[i];
+        if (s.tvgShape->intersects(pos.x, pos.y)) { return s.id; }
+    }
+    return 0;
 }
 }

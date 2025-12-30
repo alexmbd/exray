@@ -54,8 +54,10 @@ class Application
 
     DrawAttributes m_drawAttr;
 
-    State m_state       = State::Select;
-    bool m_needToRedraw = false;
+    uint32_t m_selectedId = 0;
+
+    State m_state         = State::Select;
+    bool m_needToRedraw   = false;
 
     void selectState();
     void drawState();

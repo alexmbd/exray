@@ -17,6 +17,7 @@ struct Shape
 {
     tvg::Shape *tvgShape; // Non-owning pointer
     uint32_t id;          // Set by the Canvas
+    Rectangle bounds;     // Used for hit testing
 };
 
 class Canvas
@@ -40,11 +41,14 @@ class Canvas
     // Returns true if the lines create a closed shape (points[0] == pos approximately) and false otherwise
     bool addLines(uint32_t id, const Vector2 &pos, const std::vector<Vector2> &points);
 
+    // Returns the id of the first shape that pos is contained. Otherwise, it returns 0 (an invalid id)
+    uint32_t shapeHasPoint(const Vector2 &pos);
+
   private:
     tvg::SwCanvas *m_tvgCanvas;
     std::vector<Shape> m_shapes;
 
-    uint32_t m_currentID  = 0;
+    uint32_t m_currentID  = 0; // An id of 0 represents an invalid id
 
     float m_lineThreshold = 2.0f;
 

@@ -72,6 +72,8 @@ void Application::selectState()
         m_needToRedraw = false;
     }
 
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) { m_selectedId = m_canvas->shapeHasPoint(GetMousePosition()); }
+
     if (IsKeyReleased(KEY_TWO))
     {
         m_state = State::DrawRect;
@@ -101,8 +103,7 @@ void Application::drawState()
 {
     if (m_state == State::DrawLine)
     {
-        Vector2 mousePos      = GetMousePosition();
-        Vector2 worldMousePos = {(mousePos.x - m_camera.target.x) / m_camera.zoom, (mousePos.y - m_camera.target.y) / m_camera.zoom};
+        Vector2 worldMousePos = Vector2Scale(Vector2Subtract(GetMousePosition(), m_camera.target), 1.0f / m_camera.zoom);
 
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && (m_drawAttr.id == 0))
         {
@@ -140,8 +141,7 @@ void Application::drawState()
     {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
-            Vector2 mousePos      = GetMousePosition();
-            Vector2 worldMousePos = {(mousePos.x - m_camera.target.x) / m_camera.zoom, (mousePos.y - m_camera.target.y) / m_camera.zoom};
+            Vector2 worldMousePos = Vector2Scale(Vector2Subtract(GetMousePosition(), m_camera.target), 1.0f / m_camera.zoom);
             if (m_drawAttr.id == 0)
             {
                 m_drawAttr.id = m_canvas->createShape();
