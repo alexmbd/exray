@@ -100,10 +100,72 @@ void Canvas::addEllipse(uint32_t id, const Vector2 &pos, const Vector2 &size)
     s->tvgShape->appendCircle(center.x, center.y, radius.x, radius.y);
 }
 
+void Canvas::addArrowLine(uint32_t id, const Vector2 &posA, const Vector2 &posB)
+{
+    Shape *s          = shape(id);
+
+    float headLength  = 12.0f;
+    float headWidth   = 8.0f;
+    Vector2 direction = Vector2Normalize(Vector2Subtract(posA, posB));
+    Vector2 perp      = {-direction.y, direction.x};
+    Vector2 point     = Vector2Add(posB, Vector2Scale(direction, headLength));
+    Vector2 posC      = Vector2Add(point, Vector2Scale(perp, headWidth));
+    Vector2 posD      = Vector2Subtract(point, Vector2Scale(perp, headWidth));
+
+    s->tvgShape->reset();
+    s->tvgShape->strokeCap(tvg::StrokeCap::Round);
+    s->tvgShape->lineTo(posA.x, posA.y);
+    s->tvgShape->lineTo(posB.x, posB.y);
+
+    s->tvgShape->moveTo(posC.x, posC.y);
+    s->tvgShape->lineTo(posB.x, posB.y);
+    s->tvgShape->moveTo(posD.x, posD.y);
+    s->tvgShape->lineTo(posB.x, posB.y);
+}
+
+bool Canvas::addArrowLines(uint32_t id, const Vector2 &pos, const std::vector<Vector2> &points)
+{
+    Shape *s = shape(id);
+    s->tvgShape->reset();
+    s->tvgShape->strokeCap(tvg::StrokeCap::Round);
+
+    for (const Vector2 &point : points) { s->tvgShape->lineTo(point.x, point.y); }
+
+    const Vector2 &lastPos = points.back();
+    float headLength       = 12.0f;
+    float headWidth        = 8.0f;
+    Vector2 direction      = Vector2Normalize(Vector2Subtract(lastPos, pos));
+    Vector2 perp           = {-direction.y, direction.x};
+    Vector2 point          = Vector2Add(pos, Vector2Scale(direction, headLength));
+    Vector2 posC           = Vector2Add(point, Vector2Scale(perp, headWidth));
+    Vector2 posD           = Vector2Subtract(point, Vector2Scale(perp, headWidth));
+
+    Vector2 diff           = Vector2Subtract(points[0], pos);
+    if ((points.size() >= 3) && (std::abs(diff.x) < m_lineThreshold) && (std::abs(diff.y) < m_lineThreshold))
+    {
+        s->tvgShape->close();
+        s->tvgShape->moveTo(posC.x, posC.y);
+        s->tvgShape->lineTo(pos.x, pos.y);
+        s->tvgShape->moveTo(posD.x, posD.y);
+        s->tvgShape->lineTo(pos.x, pos.y);
+        return true;
+    }
+    else
+    {
+        s->tvgShape->lineTo(pos.x, pos.y);
+        s->tvgShape->moveTo(posC.x, posC.y);
+        s->tvgShape->lineTo(pos.x, pos.y);
+        s->tvgShape->moveTo(posD.x, posD.y);
+        s->tvgShape->lineTo(pos.x, pos.y);
+        return false;
+    }
+}
+
 void Canvas::addLine(uint32_t id, const Vector2 &posA, const Vector2 &posB)
 {
     Shape *s = shape(id);
     s->tvgShape->reset();
+    s->tvgShape->strokeCap(tvg::StrokeCap::Round);
     s->tvgShape->lineTo(posA.x, posA.y);
     s->tvgShape->lineTo(posB.x, posB.y);
 }
@@ -112,6 +174,7 @@ bool Canvas::addLines(uint32_t id, const Vector2 &pos, const std::vector<Vector2
 {
     Shape *s = shape(id);
     s->tvgShape->reset();
+    s->tvgShape->strokeCap(tvg::StrokeCap::Round);
 
     for (const Vector2 &point : points) { s->tvgShape->lineTo(point.x, point.y); }
 

@@ -92,6 +92,12 @@ void Application::selectState()
         SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
     }
 
+    if (IsKeyReleased(KEY_FIVE))
+    {
+        m_state = State::DrawArrowLine;
+        SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
+    }
+
     if (IsKeyReleased(KEY_SIX))
     {
         m_state = State::DrawLine;
@@ -101,7 +107,7 @@ void Application::selectState()
 
 void Application::drawState()
 {
-    if (m_state == State::DrawLine)
+    if ((m_state == State::DrawArrowLine) || (m_state == State::DrawLine))
     {
         Vector2 worldMousePos = Vector2Scale(Vector2Subtract(GetMousePosition(), m_camera.target), 1.0f / m_camera.zoom);
 
@@ -124,7 +130,11 @@ void Application::drawState()
                 if (distance < m_drawAttr.distanceThreshold) { m_drawAttr.isDragging = false; }
                 else
                 {
-                    m_canvas->addLine(m_drawAttr.id, m_drawAttr.points[0], worldMousePos);
+                    if (m_state == State::DrawArrowLine) { m_canvas->addArrowLine(m_drawAttr.id, m_drawAttr.points[0], worldMousePos); }
+                    else
+                    {
+                        m_canvas->addLine(m_drawAttr.id, m_drawAttr.points[0], worldMousePos);
+                    }
                     m_drawAttr.lineDone = true;
                     m_needToRedraw      = true;
                 }
@@ -133,8 +143,15 @@ void Application::drawState()
 
         if ((m_drawAttr.id != 0) && (!m_drawAttr.lineDone))
         {
-            m_drawAttr.lineDone = m_canvas->addLines(m_drawAttr.id, worldMousePos, m_drawAttr.points);
-            m_needToRedraw      = true;
+            if (m_state == State::DrawArrowLine)
+            {
+                m_drawAttr.lineDone = m_canvas->addArrowLines(m_drawAttr.id, worldMousePos, m_drawAttr.points);
+            }
+            else
+            {
+                m_drawAttr.lineDone = m_canvas->addLines(m_drawAttr.id, worldMousePos, m_drawAttr.points);
+            }
+            m_needToRedraw = true;
         }
     }
     else
@@ -167,7 +184,8 @@ void Application::drawState()
         m_needToRedraw = false;
     }
 
-    if (IsKeyReleased(KEY_ONE) || IsKeyReleased(KEY_ESCAPE) || (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && (m_state != State::DrawLine)) ||
+    if (IsKeyReleased(KEY_ONE) || IsKeyReleased(KEY_ESCAPE) ||
+        (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && (m_state != State::DrawArrowLine) && (m_state != State::DrawLine)) ||
         m_drawAttr.lineDone)
     {
         m_drawAttr.reset();

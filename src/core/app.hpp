@@ -22,6 +22,7 @@ class Application
         DrawRect,
         DrawDiamond,
         DrawEllipse,
+        DrawArrowLine,
         DrawLine
     };
 

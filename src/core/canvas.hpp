@@ -37,6 +37,11 @@ class Canvas
     void addRect(uint32_t id, const Vector2 &pos, const Vector2 &size);
     void addDiamond(uint32_t id, const Vector2 &pos, const Vector2 &size);
     void addEllipse(uint32_t id, const Vector2 &pos, const Vector2 &size);
+
+    void addArrowLine(uint32_t id, const Vector2 &posA, const Vector2 &posB);
+    // Returns true if the lines create a closed shape (points[0] == pos approximately) and false otherwise
+    bool addArrowLines(uint32_t id, const Vector2 &pos, const std::vector<Vector2> &points);
+
     void addLine(uint32_t id, const Vector2 &posA, const Vector2 &posB);
     // Returns true if the lines create a closed shape (points[0] == pos approximately) and false otherwise
     bool addLines(uint32_t id, const Vector2 &pos, const std::vector<Vector2> &points);
