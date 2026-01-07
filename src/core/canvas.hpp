@@ -47,13 +47,16 @@ class Canvas
     bool addLines(uint32_t id, const Vector2 &pos, const std::vector<Vector2> &points);
 
     // Returns the id of the first shape that pos is contained. Otherwise, it returns 0 (an invalid id)
-    uint32_t shapeHasPoint(const Vector2 &pos);
+    uint32_t setSelectedShape(const Vector2 &pos);
+    // Returns a non-owning pointer or a nullptr if nothing is selected
+    Shape *selectedShape();
 
   private:
     tvg::SwCanvas *m_tvgCanvas;
     std::vector<Shape> m_shapes;
 
     uint32_t m_currentID  = 0; // An id of 0 represents an invalid id
+    uint32_t m_selectedID = 0;
 
     float m_lineThreshold = 2.0f;
 

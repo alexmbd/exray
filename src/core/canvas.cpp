@@ -40,7 +40,17 @@ void Canvas::update(const Camera &camera)
     UpdateTexture(m_texture, m_image.data);
 }
 
-void Canvas::draw() { DrawTexture(m_texture, 0, 0, WHITE); }
+void Canvas::draw()
+{
+    DrawTexture(m_texture, 0, 0, WHITE);
+    if (m_selectedID != 0)
+    {
+        Shape *s       = shape(m_selectedID);
+        float offset   = 5.0f;
+        Rectangle rect = {s->bounds.x - offset, s->bounds.y - offset, s->bounds.width + offset * 2.0f, s->bounds.height + offset * 2.0f};
+        DrawRectangleLinesEx(rect, 2.0f, MAGENTA);
+    }
+}
 
 uint32_t Canvas::createShape()
 {
@@ -191,14 +201,21 @@ bool Canvas::addLines(uint32_t id, const Vector2 &pos, const std::vector<Vector2
     }
 }
 
-uint32_t Canvas::shapeHasPoint(const Vector2 &pos)
+uint32_t Canvas::setSelectedShape(const Vector2 &pos)
 {
+    m_selectedID = 0;
     // The first item of the vector is always the background rect
     for (std::size_t i = m_shapes.size() - 1; i > 0; i--)
     {
         const Shape &s = m_shapes[i];
-        if (s.tvgShape->intersects(pos.x, pos.y)) { return s.id; }
+        if (s.tvgShape->intersects(pos.x, pos.y))
+        {
+            m_selectedID = s.id;
+            return m_selectedID;
+        }
     }
-    return 0;
+    return m_selectedID;
 }
+
+Shape *Canvas::selectedShape() { return shape(m_selectedID); }
 }

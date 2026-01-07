@@ -72,7 +72,7 @@ void Application::selectState()
         m_needToRedraw = false;
     }
 
-    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) { m_selectedId = m_canvas->shapeHasPoint(GetMousePosition()); }
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) { m_selectedID = m_canvas->setSelectedShape(GetMousePosition()); }
 
     if (IsKeyReleased(KEY_TWO))
     {
