@@ -26,17 +26,17 @@ thorvg_proj = subproject(
   default_options: [
     'default_library=static',
     'buildtype=release',
-    'prefix=' + meson.current_source_dir() + '/external/thorvg'
+    'prefix=' + meson.current_source_dir() + '/external/thorvg',
+    'threads=false',
+    'extra=' # Disable Lottie Expressions support (maybe enabled in the future)
   ]
 )
 thorvg_dep = thorvg_proj.get_variable('thorvg_dep')
 
-openmp_dep = dependency('openmp', language: 'cpp')
-
 sys_deps = []
 cpp = meson.get_compiler('cpp')
 if host_machine.system() == 'windows'
-  add_project_link_arguments('-lstdc++exp', language: 'cpp') # For MinGW
+  add_project_link_arguments('-lstdc++exp', '-static-libgcc', '-static-libstdc++', language: 'cpp') # For MinGW
   sys_deps += [
     cpp.find_library('opengl32'),
     cpp.find_library('gdi32'),
@@ -48,7 +48,7 @@ if host_machine.system() == 'windows'
 endif
 
 deps = declare_dependency(
-  dependencies: [raylib_dep, thorvg_dep, openmp_dep] + sys_deps
+  dependencies: [raylib_dep, thorvg_dep] + sys_deps
 )
 
 executable(
