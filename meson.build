@@ -19,7 +19,7 @@ src = [
 
 inc = ['src']
 
-raylib_dep = subproject('raylib').get_variable('raylib_dep')
+raylib_dep = subproject('rl').get_variable('raylib_dep')
 
 thorvg_proj = subproject(
   'thorvg',
@@ -36,7 +36,7 @@ thorvg_dep = thorvg_proj.get_variable('thorvg_dep')
 sys_deps = []
 cpp = meson.get_compiler('cpp')
 if host_machine.system() == 'windows'
-  add_project_link_arguments('-lstdc++exp', '-static-libgcc', '-static-libstdc++', language: 'cpp') # For MinGW
+  add_project_link_arguments('-lstdc++exp', '-static', '-static-libgcc', '-static-libstdc++', language: 'cpp') # For MinGW
   sys_deps += [
     cpp.find_library('opengl32'),
     cpp.find_library('gdi32'),

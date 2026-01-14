@@ -1,10 +1,10 @@
 project('raylib', 'c', version: '5.5')
 
-raylib_inc = include_directories('include')
+raylib_inc = include_directories('raylib/src')
 
 raylib_lib = meson.get_compiler('c').find_library(
   'raylib',
-  dirs: meson.current_source_dir() + '/lib',
+  dirs: meson.current_source_dir() + '/raylib/build/raylib',
   static: true
 )
 
