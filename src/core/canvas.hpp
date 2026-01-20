@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "thorvg.h"
 
+#include <memory>
 #include <vector>
 
 namespace Exray
@@ -20,10 +21,12 @@ struct Shape
     Rectangle bounds;     // Used for hit testing
 };
 
+inline constexpr uint32_t INVALID_ID = 0;
+
 class Canvas
 {
   public:
-    Canvas(int32_t width, int32_t height);
+    explicit Canvas(int32_t width, int32_t height);
     ~Canvas();
 
     void update(const Camera &camera);
@@ -55,12 +58,62 @@ class Canvas
     tvg::SwCanvas *m_tvgCanvas;
     std::vector<Shape> m_shapes;
 
-    uint32_t m_currentID  = 0; // An id of 0 represents an invalid id
-    uint32_t m_selectedID = 0;
+    uint32_t m_currentID  = INVALID_ID; // ID used for Shape creation
+    uint32_t m_selectedID = INVALID_ID; // ID of the selected Shape
 
     float m_lineThreshold = 2.0f;
 
     Image m_image         = {0};
     Texture2D m_texture   = {0};
+};
+
+// Basically, a Canvas plus Input (Mouse and Keyboard) Handling
+class CanvasHandler
+{
+  public:
+    enum class State
+    {
+        Select,
+        DrawRect,
+        DrawDiamond,
+        DrawEllipse,
+        DrawArrowLine,
+        DrawLine
+    };
+
+    CanvasHandler();
+    ~CanvasHandler() = default;
+
+    void update();
+    void draw();
+
+  private:
+    struct DrawAttributes
+    {
+        std::vector<Vector2> points;
+        bool lineDone           = false;
+        bool isDragging         = false;
+        uint32_t id             = INVALID_ID;
+        float distanceThreshold = 8.0f;
+
+        inline void reset()
+        {
+            points.clear();
+            lineDone   = false;
+            isDragging = false;
+            id         = INVALID_ID;
+        }
+    };
+
+    std::unique_ptr<Canvas> m_canvas;
+    Camera m_camera;
+    DrawAttributes m_drawAttr;
+
+    uint32_t m_selectedID = INVALID_ID;
+    bool m_needToRedraw   = false;
+    State m_state         = State::Select;
+
+    void selectState();
+    void drawState();
 };
 }
